@@ -63,12 +63,12 @@ body {
 </div>
 
 <script>
-const pages = document.querySelectorAll(".reader img");
+const images = document.querySelectorAll(".reader img");
 const counter = document.getElementById("counter");
 
-// total pages (based on data-pages)
+// total pages
 let total = 0;
-pages.forEach(img => {
+images.forEach(img => {
     total += parseInt(img.dataset.pages || 1);
 });
 
@@ -78,13 +78,14 @@ function updatePage() {
     let current = 1;
     let count = 0;
 
-    pages.forEach(img => {
+    images.forEach(img => {
         const rect = img.getBoundingClientRect();
         const pageCount = parseInt(img.dataset.pages || 1);
 
-        // check if image is in center of screen
-        if (rect.top <= window.innerHeight / 2 &&
-            rect.bottom >= window.innerHeight / 2) {
+        if (
+            rect.top <= window.innerHeight / 2 &&
+            rect.bottom >= window.innerHeight / 2
+        ) {
             current = count + 1;
         }
 
@@ -97,15 +98,20 @@ function updatePage() {
 window.addEventListener("scroll", updatePage);
 window.addEventListener("load", updatePage);
 
-const pages = [
+/* =========================
+   PRELOAD NEXT 3 PAGES
+========================= */
+
+const preloadPages = [
     "page2.jpg",
     "page3.jpg",
     "page4.jpg"
 ];
 
-pages.forEach(src => {
+preloadPages.forEach(src => {
     const img = new Image();
     img.src = src;
+});
 </script>
 
 </body>
