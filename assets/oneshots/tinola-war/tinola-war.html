@@ -53,12 +53,23 @@ body {
 
 <div class="reader">
 
-    <img src="page1.jpg" data-pages="1" >
-    <img src="page2.jpg" data-pages="1">
+    <img src="page001.jpg" data-pages="1" >
+    <img src="page002.jpg" data-pages="1" loading="lazy">
+    <img src="page003.jpg" data-pages="1" loading="lazy">
     <!-- SPREAD (counts as 2 pages) -->
-    <img src="page4.jpg" class="spread" data-pages="2" loading="lazy">
-    <img src="page3.jpg" data-pages="1" loading="lazy">
-    
+    <img src="page004-005.jpg" class="spread" data-pages="2" loading="lazy">
+    <img src="page006.jpg" data-pages="1" loading="lazy">
+    <img src="page007.jpg" data-pages="1" loading="lazy">
+    <img src="page008.jpg" data-pages="1" loading="lazy">
+    <img src="page009.jpg" data-pages="1" loading="lazy">
+    <img src="page010.jpg" data-pages="1" loading="lazy">
+    <img src="page011.jpg" data-pages="1" loading="lazy">
+    <!-- SPREAD (counts as 2 pages) -->
+    <img src="page012-013.jpg" class="spread" data-pages="2" loading="lazy">
+    <img src="page014.jpg" data-pages="1" loading="lazy">
+    <!-- SPREAD (counts as 2 pages) -->
+    <img src="page015-016.jpg" class="spread" data-pages="2" loading="lazy">
+    <img src="page017.jpg" data-pages="1" loading="lazy">
 
 </div>
 
@@ -66,8 +77,11 @@ body {
 const images = document.querySelectorAll(".reader img");
 const counter = document.getElementById("counter");
 
-// total pages
+/* =========================
+   PAGE COUNTER (spread-aware)
+========================= */
 let total = 0;
+
 images.forEach(img => {
     total += parseInt(img.dataset.pages || 1);
 });
@@ -99,19 +113,16 @@ window.addEventListener("scroll", updatePage);
 window.addEventListener("load", updatePage);
 
 /* =========================
-   PRELOAD NEXT 3 PAGES
+   HYBRID PRELOAD (NEXT 3 PAGES)
+   - scalable for 50+ pages
 ========================= */
 
-const preloadPages = [
-    "page2.jpg",
-    "page3.jpg",
-    "page4.jpg"
-];
+const totalPages = total; // uses your dataset system
 
-preloadPages.forEach(src => {
+for (let i = 2; i <= Math.min(4, totalPages); i++) {
     const img = new Image();
-    img.src = src;
-});
+    img.src = `page${i}.jpg`;
+}
 </script>
 
 </body>
