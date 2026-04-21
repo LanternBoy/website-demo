@@ -8,6 +8,8 @@
 body {
     margin: 0;
     background: #000;
+    color: #fff;
+    font-family: Arial;
 }
 
 /* PAGE COUNTER */
@@ -16,14 +18,13 @@ body {
     bottom: 20px;
     right: 20px;
     background: rgba(0,0,0,0.7);
-    color: #fff;
     padding: 8px 12px;
     border-radius: 6px;
     font-size: 14px;
     z-index: 1000;
 }
 
-/* container for vertical reading */
+/* READER */
 .reader {
     display: flex;
     flex-direction: column;
@@ -52,12 +53,15 @@ body {
 
 <div class="reader">
 
-    <img src="page1.jpg">
-    <img src="page2.jpg">
-    <img src="page3.jpg">
+    <img src="page1.jpg" data-pages="1">
+    <img src="page2.jpg" data-pages="1">
+    <img src="page3.jpg" data-pages="1">
 
-    <!-- SPREAD -->
-    <img src="page4.jpg" class="spread">
+    <!-- SPREAD (counts as 2 pages) -->
+    <img src="page4.jpg" class="spread" data-pages="2">
+
+    <img src="page5.jpg" data-pages="1">
+    <img src="page6.jpg" data-pages="1">
 
 </div>
 
@@ -65,25 +69,36 @@ body {
 const pages = document.querySelectorAll(".reader img");
 const counter = document.getElementById("counter");
 
-const total = pages.length;
+// total pages (based on data-pages)
+let total = 0;
+pages.forEach(img => {
+    total += parseInt(img.dataset.pages || 1);
+});
+
 counter.textContent = `1 / ${total}`;
 
 function updatePage() {
     let current = 1;
+    let count = 0;
 
-    pages.forEach((img, index) => {
+    pages.forEach(img => {
         const rect = img.getBoundingClientRect();
+        const pageCount = parseInt(img.dataset.pages || 1);
 
-        // check if image is near center of screen
-        if (rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2) {
-            current = index + 1;
+        // check if image is in center of screen
+        if (rect.top <= window.innerHeight / 2 &&
+            rect.bottom >= window.innerHeight / 2) {
+            current = count + 1;
         }
+
+        count += pageCount;
     });
 
     counter.textContent = `${current} / ${total}`;
 }
 
 window.addEventListener("scroll", updatePage);
+window.addEventListener("load", updatePage);
 </script>
 
 </body>
