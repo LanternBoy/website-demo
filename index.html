@@ -152,6 +152,13 @@ h2 {
     border-radius: 10px;
 }
 
+.modal-year {
+    font-size: 16px;   /* smaller than title */
+    color: #888;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
 .modal h1 {
     margin: 0;
 }
@@ -235,6 +242,7 @@ body {
 
         <div>
             <h1 id="modalTitle"></h1>
+            <div id="modalYear" class="modal-year"></div>
             <p id="modalDesc"></p>
 
             <!-- ✅ READ BUTTON OPENS NEW TAB -->
@@ -254,13 +262,15 @@ const data = {
     tinola: {
         img: "assets/oneshots/tinola-war/cover.jpg",
         title: "Tinola War",
+        year: "2026",
         desc: "A chaotic war story where tinola becomes a weapon of survival and absurd logic.",
         link: "assets/oneshots/tinola-war/tinola-war.html"
     },
     newoneshot: {
     img: "assets/oneshots/new-folder/cover.jpg",
-    title: "New One-Shot Name",
-    desc: "Short description of the story.",
+    title: "Short One-Shot Name",
+    year: "2025",
+    desc: "The story is short so it's just a short description of the story.",
     link: "assets/oneshots/new-folder/newoneshot.html"
 }
 };
@@ -279,6 +289,7 @@ function openModal(key) {
 
     modalImg.src = item.img;
     modalTitle.textContent = item.title;
+    modalYear.textContent = item.year;
     modalDesc.textContent = item.desc;
 
     readBtn.href = item.link;
