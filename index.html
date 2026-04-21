@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -41,10 +40,33 @@ h2 {
     width: 100%;
     border-radius: 8px;
     transition: 0.2s;
+    cursor: pointer;
 }
 
 .gallery img:hover {
     transform: scale(1.05);
+}
+
+/* LIGHTBOX */
+.lightbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0,0,0,0.9);
+    display: none;
+
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.lightbox img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 10px;
 }
 
 /* MANGA LIST */
@@ -82,13 +104,13 @@ footer {
 <header>
     Andres Villarosa
 </header>
-    
+
 <!-- MANGA -->
 <h2>One-Shots</h2>
 <div class="manga-list">
 
     <div class="manga-item">
-        <a href="/AndresVillarosawebsite/assets/oneshots/tinola-war/tinola-war.html">Tinola War</a>
+        <a href="assets/oneshots/tinola-war/tinola-war.html">Tinola War</a>
     </div>
 
     <div class="manga-item">
@@ -96,19 +118,45 @@ footer {
     </div>
 
 </div>
-    
+
 <!-- ILLUSTRATIONS -->
 <h2>Illustrations</h2>
 <div class="gallery">
-    <img src="art1.jpg">
-    <img src="assets/illustrations/page2.jpg">
-    <img src="assets/illustrations/page3.jpg">
+    <img src="art1.jpg" draggable="false">
+    <img src="assets/illustrations/page2.jpg" draggable="false">
+    <img src="assets/illustrations/page3.jpg" draggable="false">
+</div>
+
+<!-- LIGHTBOX (popup viewer) -->
+<div class="lightbox" id="lightbox">
+    <img id="lightbox-img">
 </div>
 
 <footer>
     © 2026 Andres Villarosa
 </footer>
 
+<script>
+// LIGHTBOX FUNCTION
+const images = document.querySelectorAll(".gallery img");
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightbox-img");
+
+images.forEach(img => {
+    img.addEventListener("click", () => {
+        lightbox.style.display = "flex";
+        lightboxImg.src = img.src;
+    });
+});
+
+// CLOSE LIGHTBOX
+lightbox.addEventListener("click", () => {
+    lightbox.style.display = "none";
+});
+
+// OPTIONAL: disable right-click
+document.addEventListener("contextmenu", e => e.preventDefault());
+</script>
+
 </body>
 </html>
-```
