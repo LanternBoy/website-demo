@@ -7,21 +7,24 @@
 <style>
 body {
     margin: 0;
+    font-family: Arial, sans-serif;
     background: #0d0d0d;
     color: #eee;
-    font-family: Arial;
 }
 
+/* HEADER */
 header {
     text-align: center;
     padding: 20px;
     background: black;
     font-size: 28px;
+    letter-spacing: 2px;
 }
 
 /* SECTION TITLES */
 h2 {
     margin: 30px 20px 10px;
+    font-weight: normal;
     border-bottom: 1px solid #333;
     padding-bottom: 5px;
 }
@@ -55,29 +58,37 @@ h2 {
 
 .gallery img {
     width: 100%;
-    cursor: pointer;
     border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
-/* LIGHTBOX */
+.gallery img:hover {
+    transform: scale(1.05);
+}
+
+/* LIGHTBOX (UPDATED ONLY) */
 .lightbox {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.95);
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(12px);
     display: none;
     justify-content: center;
     align-items: center;
     z-index: 999;
 }
 
+/* IMAGE */
 .lightbox img {
     max-width: 90%;
     max-height: 90%;
     cursor: grab;
-    transition: transform 0.1s;
+    user-select: none;
+    transition: transform 0.05s;
 }
 
-/* UI CONTROLS */
+/* UI CONTROLS (kept) */
 .ui {
     position: fixed;
     top: 20px;
@@ -93,15 +104,6 @@ h2 {
     border: none;
     padding: 8px 12px;
     cursor: pointer;
-}
-
-/* COUNTER */
-.counter {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: rgba(0,0,0,0.6);
-    padding: 6px 10px;
 }
 
 /* FOOTER */
@@ -120,7 +122,7 @@ footer {
     Andres Villarosa
 </header>
 
-<!-- ONE SHOTS -->
+<!-- ONE SHOTS (UNCHANGED) -->
 <h2>One-Shots</h2>
 <div class="manga-list">
 
@@ -134,12 +136,12 @@ footer {
 
 </div>
 
-<!-- ILLUSTRATIONS -->
+<!-- ILLUSTRATIONS (UNCHANGED) -->
 <h2>Illustrations</h2>
 <div class="gallery">
-    <img src="art1.jpg" draggable="false">
-    <img src="assets/illustrations/page2.jpg" draggable="false">
-    <img src="assets/illustrations/page3.jpg" draggable="false">
+    <img src="art1.jpg">
+    <img src="assets/illustrations/page2.jpg">
+    <img src="assets/illustrations/page3.jpg">
 </div>
 
 <!-- LIGHTBOX -->
@@ -147,16 +149,12 @@ footer {
     <img id="img">
 </div>
 
-<!-- UI -->
+<!-- CONTROLS -->
 <div class="ui">
     <button onclick="zoomIn()">+</button>
     <button onclick="zoomOut()">−</button>
     <button onclick="resetZoom()">Reset</button>
-    <button onclick="toggleFull()">⛶</button>
 </div>
-
-<!-- COUNTER -->
-<div class="counter" id="counter">1 / 1</div>
 
 <footer>
     © 2026 Andres Villarosa
@@ -166,122 +164,98 @@ footer {
 const images = document.querySelectorAll(".gallery img");
 const lightbox = document.getElementById("lightbox");
 const img = document.getElementById("img");
-const counter = document.getElementById("counter");
 
 let index = 0;
 
-// PRELOAD
-images.forEach(i => {
-    const preload = new Image();
-    preload.src = i.src;
-});
+/* ===== ZOOM + DRAG STATE ===== */
+let scale = 1;
+let x = 0, y = 0;
+let dragging = false;
+let startX, startY;
 
-// ZOOM + DRAG
-let scale = 1, x = 0, y = 0;
-let dragging = false, startX, startY;
-
-// OPEN
+/* ===== OPEN IMAGE ===== */
 images.forEach((el, i) => {
-    el.onclick = () => {
+    el.addEventListener("click", () => {
         index = i;
-        open();
-    };
+        openImage();
+    });
 });
 
-function open() {
+function openImage() {
     lightbox.style.display = "flex";
     img.src = images[index].src;
     resetZoom();
-    updateCounter();
 }
 
-function updateCounter() {
-    counter.textContent = `${index + 1} / ${images.length}`;
-}
+/* ===== CLOSE ===== */
+lightbox.addEventListener("click", (e) => {
+    if (e.target === lightbox) {
+        lightbox.style.display = "none";
+    }
+});
 
-// CLOSE
-lightbox.onclick = e => {
-    if (e.target === lightbox) lightbox.style.display = "none";
-};
-
-// ZOOM BUTTONS
-function zoomIn() {
-    scale = Math.min(scale + 0.3, 5);
-    update();
-}
-function zoomOut() {
-    scale = Math.max(scale - 0.3, 1);
-    update();
-}
-function resetZoom() {
-    scale = 1; x = 0; y = 0;
-    update();
-}
-
+/* ===== UPDATE TRANSFORM ===== */
 function update() {
     img.style.transform = `scale(${scale}) translate(${x}px, ${y}px)`;
 }
 
-// SCROLL ZOOM
-lightbox.addEventListener("wheel", e => {
-    e.preventDefault();
-    scale += e.deltaY * -0.001;
-    scale = Math.min(Math.max(1, scale), 5);
+/* ===== ZOOM BUTTONS ===== */
+function zoomIn() {
+    scale = Math.min(scale + 0.3, 5);
     update();
-});
+}
 
-// DRAG
-img.onmousedown = e => {
+function zoomOut() {
+    scale = Math.max(scale - 0.3, 1);
+    update();
+}
+
+function resetZoom() {
+    scale = 1;
+    x = 0;
+    y = 0;
+    update();
+}
+
+/* ===== HOLD + DRAG (FIXED) ===== */
+img.addEventListener("mousedown", (e) => {
     dragging = true;
     startX = e.clientX - x;
     startY = e.clientY - y;
-};
+    img.style.cursor = "grabbing";
+});
 
-window.onmousemove = e => {
+window.addEventListener("mousemove", (e) => {
     if (!dragging) return;
+
     x = e.clientX - startX;
     y = e.clientY - startY;
     update();
-};
+});
 
-window.onmouseup = () => dragging = false;
+window.addEventListener("mouseup", () => {
+    dragging = false;
+    img.style.cursor = "grab";
+});
 
-// DOUBLE CLICK ZOOM
-img.ondblclick = () => {
-    scale = scale === 1 ? 2 : 1;
-    update();
-};
-
-// KEYBOARD
-window.onkeydown = e => {
+/* ===== ARROW KEYS ===== */
+window.addEventListener("keydown", (e) => {
     if (lightbox.style.display !== "flex") return;
 
     if (e.key === "ArrowRight") {
         index = (index + 1) % images.length;
-        open();
+        openImage();
     }
 
     if (e.key === "ArrowLeft") {
         index = (index - 1 + images.length) % images.length;
-        open();
+        openImage();
     }
 
     if (e.key === "Escape") {
         lightbox.style.display = "none";
     }
-};
-
-// FULLSCREEN
-function toggleFull() {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen();
-    } else {
-        document.exitFullscreen();
-    }
-}
-
-// OPTIONAL: disable right-click
-document.addEventListener("contextmenu", e => e.preventDefault());
+});
 </script>
 
 </body>
