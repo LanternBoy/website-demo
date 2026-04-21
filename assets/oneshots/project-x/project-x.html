@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>project-x</title>
+
+<style>
+body {
+    margin: 0;
+    background: #000;
+    color: #fff;
+    font-family: Arial;
+}
+/* PAGE WRAPPER */
+.page {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+/* PAGE NUMBER */
+.page-num {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    font-size: 12px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    pointer-events: none;
+}
+/* PAGE COUNTER */
+.page-counter {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.7);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    z-index: 1000;
+}
+
+/* READER */
+.reader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+/* normal pages */
+.reader img {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+}
+
+/* spreads */
+.reader img.spread {
+    max-width: 1400px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- PAGE COUNTER -->
+<div class="page-counter" id="counter">1 / 1</div>
+
+<div class="reader">
+
+    <!-- PAGE 1 -->
+    <div class="page">
+        <img src="page001.jpg" data-pages="1">
+        <div class="page-num">1</div>
+    </div>
+    
+</div>
+
+<script>
+const pages = document.querySelectorAll(".page");
+const counter = document.getElementById("counter");
+
+/* =========================
+   TOTAL PAGES (spread-aware)
+========================= */
+let total = 0;
+
+pages.forEach(page => {
+    const img = page.querySelector("img");
+    total += parseInt(img.dataset.pages || 1);
+});
+
+counter.textContent = `1 / ${total}`;
+
+/* =========================
+   SCROLL PAGE TRACKING
+========================= */
+function updatePage() {
+    let current = 1;
+    let count = 0;
+
+    pages.forEach(page => {
+        const img = page.querySelector("img");
+        const rect = page.getBoundingClientRect();
+        const pageCount = parseInt(img.dataset.pages || 1);
+
+        if (
+            rect.top <= window.innerHeight / 2 &&
+            rect.bottom >= window.innerHeight / 2
+        ) {
+            current = count + 1;
+        }
+
+        count += pageCount;
+    });
+
+    counter.textContent = `${current} / ${total}`;
+}
+
+window.addEventListener("scroll", updatePage);
+window.addEventListener("load", updatePage);
+
+/* =========================
+   PRELOAD NEXT 3 PAGES
+========================= */
+const pageImgs = document.querySelectorAll(".page img");
+
+for (let i = 1; i <= 3; i++) {
+    if (pageImgs[i]) {
+        const img = new Image();
+        img.src = pageImgs[i].src;
+    }
+}
+</script>
+
+</body>
+</html>
