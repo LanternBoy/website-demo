@@ -61,6 +61,7 @@ h2 {
     border-radius: 8px;
     cursor: pointer;
     transition: 0.2s;
+    user-select: none;
 }
 
 .gallery img:hover {
@@ -68,7 +69,7 @@ h2 {
 }
 
 /* =========================
-   LIGHTBOX (IMAGES)
+   LIGHTBOX (ILLUSTRATIONS)
 ========================= */
 .lightbox {
     position: fixed;
@@ -87,7 +88,7 @@ h2 {
     cursor: grab;
 }
 
-/* arrows */
+/* ARROWS */
 .arrow {
     position: absolute;
     top: 50%;
@@ -122,7 +123,7 @@ h2 {
 }
 
 /* =========================
-   MODAL (ONE SHOTS PREVIEW)
+   ONE-SHOT MODAL
 ========================= */
 .modal-bg {
     position: fixed;
@@ -171,12 +172,6 @@ h2 {
     font-weight: bold;
 }
 
-/* close click area */
-.close-area {
-    position: absolute;
-    inset: 0;
-}
-
 /* lock scroll */
 body.no-scroll {
     overflow: hidden;
@@ -200,10 +195,6 @@ body {
 
     <div class="manga-item">
         <a onclick="openModal('tinola')">Tinola War</a>
-    </div>
-
-    <div class="manga-item">
-        <a onclick="openModal('manga2')">One-shot #2 – Title Here</a>
     </div>
 
 </div>
@@ -232,10 +223,8 @@ body {
     <button onclick="resetZoom()">Reset</button>
 </div>
 
-<!-- MODAL -->
+<!-- ONE-SHOT MODAL -->
 <div class="modal-bg" id="modalBg">
-
-    <div class="close-area" onclick="closeModal()"></div>
 
     <div class="modal">
 
@@ -245,6 +234,7 @@ body {
             <h1 id="modalTitle"></h1>
             <p id="modalDesc"></p>
 
+            <!-- ✅ READ BUTTON OPENS NEW TAB -->
             <a id="readBtn" class="read-btn" target="_blank">Read</a>
         </div>
 
@@ -255,26 +245,19 @@ body {
 <script>
 
 /* =========================
-   ONE SHOT DATA
+   ONE-SHOT DATA
 ========================= */
 const data = {
     tinola: {
         img: "assets/oneshots/tinola-war/cover.jpg",
         title: "Tinola War",
-        desc: "A chaotic war story where tinola becomes a weapon of survival and absurdity.",
+        desc: "A chaotic war story where tinola becomes a weapon of survival and absurd logic.",
         link: "assets/oneshots/tinola-war/tinola-war.html"
-    },
-
-    manga2: {
-        img: "assets/oneshots/manga2/cover.jpg",
-        title: "One-shot #2",
-        desc: "Experimental story exploring memory, silence, and fractured reality.",
-        link: "manga2.html"
     }
 };
 
 /* =========================
-   MODAL LOGIC
+   MODAL SYSTEM
 ========================= */
 const modalBg = document.getElementById("modalBg");
 const modalImg = document.getElementById("modalImg");
@@ -288,20 +271,28 @@ function openModal(key) {
     modalImg.src = item.img;
     modalTitle.textContent = item.title;
     modalDesc.textContent = item.desc;
+
     readBtn.href = item.link;
+    readBtn.target = "_blank";
 
     modalBg.style.display = "flex";
     document.body.classList.add("no-scroll");
 }
 
-function closeModal() {
-    modalBg.style.display = "none";
-    document.body.classList.remove("no-scroll");
-}
+/* close modal (click outside) */
+modalBg.onclick = (e) => {
+    if (e.target === modalBg) {
+        modalBg.style.display = "none";
+        document.body.classList.remove("no-scroll");
+    }
+};
 
-/* ESC close */
+/* ESC key */
 window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeModal();
+    if (e.key === "Escape") {
+        modalBg.style.display = "none";
+        document.body.classList.remove("no-scroll");
+    }
 });
 
 /* =========================
@@ -338,7 +329,7 @@ function open() {
     resetZoom();
 }
 
-/* close lightbox */
+/* close */
 lightbox.onclick = (e) => {
     if (e.target === lightbox) closeLightbox();
 };
@@ -348,7 +339,7 @@ function closeLightbox() {
     document.body.classList.remove("no-scroll");
 }
 
-/* update transform */
+/* update */
 function update() {
     img.style.transform = `scale(${scale}) translate(${x}px, ${y}px)`;
 }
@@ -381,6 +372,7 @@ img.addEventListener("mousedown", (e) => {
 
 window.addEventListener("mousemove", (e) => {
     if (!dragging) return;
+
     x = e.clientX - startX;
     y = e.clientY - startY;
     update();
@@ -393,8 +385,10 @@ window.addEventListener("mouseup", () => {
 /* scroll zoom */
 lightbox.addEventListener("wheel", (e) => {
     e.preventDefault();
+
     scale += e.deltaY * -0.001;
     scale = Math.min(Math.max(1, scale), 5);
+
     update();
 }, { passive: false });
 
@@ -417,7 +411,7 @@ window.addEventListener("keydown", (e) => {
     if (e.key === "ArrowLeft") prevBtn.click();
 });
 
-/* RIGHT CLICK BLOCK */
+/* right click disable */
 document.addEventListener("contextmenu", e => e.preventDefault());
 
 </script>
