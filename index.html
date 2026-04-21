@@ -7,9 +7,9 @@
 <style>
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
     background: #0d0d0d;
     color: #eee;
+    font-family: Arial;
 }
 
 header {
@@ -17,59 +17,16 @@ header {
     padding: 20px;
     background: black;
     font-size: 28px;
-    letter-spacing: 2px;
 }
 
 /* SECTION TITLES */
 h2 {
     margin: 30px 20px 10px;
-    font-weight: normal;
     border-bottom: 1px solid #333;
     padding-bottom: 5px;
 }
 
-/* GALLERY */
-.gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 15px;
-    padding: 20px;
-}
-
-.gallery img {
-    width: 100%;
-    border-radius: 8px;
-    transition: 0.2s;
-    cursor: pointer;
-}
-
-.gallery img:hover {
-    transform: scale(1.05);
-}
-
-/* LIGHTBOX */
-.lightbox {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-
-    background: rgba(0,0,0,0.9);
-    display: none;
-
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
-}
-
-.lightbox img {
-    max-width: 90%;
-    max-height: 90%;
-    border-radius: 10px;
-}
-
-/* MANGA LIST */
+/* ONE SHOTS */
 .manga-list {
     padding: 20px;
 }
@@ -86,7 +43,65 @@ h2 {
 
 .manga-item a:hover {
     color: white;
-    text-decoration: underline;
+}
+
+/* GALLERY */
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    padding: 20px;
+}
+
+.gallery img {
+    width: 100%;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+/* LIGHTBOX */
+.lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.lightbox img {
+    max-width: 90%;
+    max-height: 90%;
+    cursor: grab;
+    transition: transform 0.1s;
+}
+
+/* UI CONTROLS */
+.ui {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.ui button {
+    background: rgba(0,0,0,0.6);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+/* COUNTER */
+.counter {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.6);
+    padding: 6px 10px;
 }
 
 /* FOOTER */
@@ -105,7 +120,7 @@ footer {
     Andres Villarosa
 </header>
 
-<!-- MANGA -->
+<!-- ONE SHOTS -->
 <h2>One-Shots</h2>
 <div class="manga-list">
 
@@ -127,32 +142,143 @@ footer {
     <img src="assets/illustrations/page3.jpg" draggable="false">
 </div>
 
-<!-- LIGHTBOX (popup viewer) -->
+<!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox">
-    <img id="lightbox-img">
+    <img id="img">
 </div>
+
+<!-- UI -->
+<div class="ui">
+    <button onclick="zoomIn()">+</button>
+    <button onclick="zoomOut()">−</button>
+    <button onclick="resetZoom()">Reset</button>
+    <button onclick="toggleFull()">⛶</button>
+</div>
+
+<!-- COUNTER -->
+<div class="counter" id="counter">1 / 1</div>
 
 <footer>
     © 2026 Andres Villarosa
 </footer>
 
 <script>
-// LIGHTBOX FUNCTION
 const images = document.querySelectorAll(".gallery img");
 const lightbox = document.getElementById("lightbox");
-const lightboxImg = document.getElementById("lightbox-img");
+const img = document.getElementById("img");
+const counter = document.getElementById("counter");
 
-images.forEach(img => {
-    img.addEventListener("click", () => {
-        lightbox.style.display = "flex";
-        lightboxImg.src = img.src;
-    });
+let index = 0;
+
+// PRELOAD
+images.forEach(i => {
+    const preload = new Image();
+    preload.src = i.src;
 });
 
-// CLOSE LIGHTBOX
-lightbox.addEventListener("click", () => {
-    lightbox.style.display = "none";
+// ZOOM + DRAG
+let scale = 1, x = 0, y = 0;
+let dragging = false, startX, startY;
+
+// OPEN
+images.forEach((el, i) => {
+    el.onclick = () => {
+        index = i;
+        open();
+    };
 });
+
+function open() {
+    lightbox.style.display = "flex";
+    img.src = images[index].src;
+    resetZoom();
+    updateCounter();
+}
+
+function updateCounter() {
+    counter.textContent = `${index + 1} / ${images.length}`;
+}
+
+// CLOSE
+lightbox.onclick = e => {
+    if (e.target === lightbox) lightbox.style.display = "none";
+};
+
+// ZOOM BUTTONS
+function zoomIn() {
+    scale = Math.min(scale + 0.3, 5);
+    update();
+}
+function zoomOut() {
+    scale = Math.max(scale - 0.3, 1);
+    update();
+}
+function resetZoom() {
+    scale = 1; x = 0; y = 0;
+    update();
+}
+
+function update() {
+    img.style.transform = `scale(${scale}) translate(${x}px, ${y}px)`;
+}
+
+// SCROLL ZOOM
+lightbox.addEventListener("wheel", e => {
+    e.preventDefault();
+    scale += e.deltaY * -0.001;
+    scale = Math.min(Math.max(1, scale), 5);
+    update();
+});
+
+// DRAG
+img.onmousedown = e => {
+    dragging = true;
+    startX = e.clientX - x;
+    startY = e.clientY - y;
+};
+
+window.onmousemove = e => {
+    if (!dragging) return;
+    x = e.clientX - startX;
+    y = e.clientY - startY;
+    update();
+};
+
+window.onmouseup = () => dragging = false;
+
+// DOUBLE CLICK ZOOM
+img.ondblclick = () => {
+    scale = scale === 1 ? 2 : 1;
+    update();
+};
+
+// KEYBOARD
+window.onkeydown = e => {
+    if (lightbox.style.display !== "flex") return;
+
+    if (e.key === "ArrowRight") {
+        index = (index + 1) % images.length;
+        open();
+    }
+
+    if (e.key === "ArrowLeft") {
+        index = (index - 1 + images.length) % images.length;
+        open();
+    }
+
+    if (e.key === "Escape") {
+        lightbox.style.display = "none";
+    }
+};
+
+// FULLSCREEN
+function toggleFull() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+    } else {
+        document.exitFullscreen();
+    }
+}
 
 // OPTIONAL: disable right-click
 document.addEventListener("contextmenu", e => e.preventDefault());
