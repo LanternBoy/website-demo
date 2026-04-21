@@ -119,9 +119,12 @@ window.addEventListener("load", updatePage);
 
 const totalPages = total; // uses your dataset system
 
-for (let i = 2; i <= Math.min(4, totalPages); i++) {
-    const img = new Image();
-    img.src = `page${i}.jpg`;
+// preload next 3 images after page 1
+for (let i = 1; i <= 3; i++) {
+    if (images[i]) {
+        const img = new Image();
+        img.src = images[i].getAttribute("src");
+    }
 }
 </script>
 
